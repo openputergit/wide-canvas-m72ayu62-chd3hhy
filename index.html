@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #FEF9E1; color: #C14600; }
+        .table-occupied { background-color: #FF9D23; }
+        .table-available { background-color: #E5D0AC; }
+        .primary-bg { background-color: #C14600; }
+        .primary-text { color: #C14600; }
+        .secondary-bg { background-color: #FF9D23; }
+        .secondary-text { color: #FF9D23; }
+        .accent-bg { background-color: #E5D0AC; }
+        .accent-text { color: #E5D0AC; }
+        .light-bg { background-color: #FEF9E1; }
+        .light-text { color: #FEF9E1; }
+    </style>
+</head>
+<body class="light-bg primary-text">
+    <!-- Sidebar -->
+    <div class="fixed top-0 left-0 h-screen w-64 primary-bg light-text p-4">
+        <h1 class="text-2xl font-bold mb-8">ChefMate</h1>
+        <nav class="space-y-4">
+            <a href="#" class="block p-2 hover:bg-[#FF9D23] rounded" onclick="showSection('menu')"><i class="bi bi-book"></i> Menu Management</a>
+            <a href="#" class="block p-2 hover:bg-[#FF9D23] rounded" onclick="showSection('orders')"><i class="bi bi-cart"></i> Orders</a>
+            <a href="#" class="block p-2 hover:bg-[#FF9D23] rounded" onclick="showSection('tables')"><i class="bi bi-grid"></i> Tables</a>
+            <a href="#" class="block p-2 hover:bg-[#FF9D23] rounded" onclick="showSection('billing')"><i class="bi bi-receipt"></i> Billing</a>
+            <a href="#" class="block p-2 hover:bg-[#FF9D23] rounded" onclick="showSection('feedback')"><i class="bi bi-chat"></i> Feedback</a>
+            <a href="#" class="block p-2 hover:bg-[#FF9D23] rounded" onclick="showSection('revenue')"><i class="bi bi-graph-up"></i> Revenue</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 p-8">
+        <!-- Menu Management Section -->
+        <section id="menu" class="section">
+            <h2 class="text-2xl font-bold mb-4">Menu Management</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="p-4 accent-bg rounded-lg shadow">
+                    <input type="text" id="itemName" placeholder="Item Name" class="w-full mb-2 p-2 border rounded light-bg primary-text">
+                    <input type="number" id="itemPrice" placeholder="Price" class="w-full mb-2 p-2 border rounded light-bg primary-text">
+                    <input type="file" id="itemImage" accept="image/*" class="w-full mb-2 p-2 border rounded light-bg primary-text">
+                    <select id="itemCategory" class="w-full mb-2 p-2 border rounded light-bg primary-text">
+                        <option value="starters">Starters</option>
+                        <option value="main">Main Course</option>
+                        <option value="desserts">Desserts</option>
+                        <option value="beverages">Beverages</option>
+                    </select>
+                    <button onclick="addMenuItem()" class="w-full secondary-bg light-text p-2 rounded">Add Item</button>
+                </div>
+                <div id="menuItems" class="col-span-2">
+                    <!-- Menu items will be displayed here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Orders Section -->
+        <section id="orders" class="section hidden">
+            <h2 class="text-2xl font-bold mb-4">Orders</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="accent-bg p-4 rounded-lg shadow">
+                    <h3 class="text-xl mb-2">New Order</h3>
+                    <select id="tableNumber" class="w-full mb-2 p-2 border rounded light-bg primary-text">
+                        <!-- Tables will be populated dynamically -->
+                    </select>
+                    <select id="orderItems" class="w-full mb-2 p-2 border rounded light-bg primary-text" multiple>
+                        <!-- Menu items will be populated dynamically -->
+                    </select>
+                    <button onclick="placeOrder()" class="w-full secondary-bg light-text p-2 rounded">Place Order</button>
+                </div>
+                <div id="activeOrders" class="accent-bg p-4 rounded-lg shadow">
+                    <!-- Active orders will be displayed here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Tables Section -->
+        <section id="tables" class="section hidden">
+            <h2 class="text-2xl font-bold mb-4">Table Management</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="tableGrid">
+                <!-- Tables will be generated here -->
+            </div>
+        </section>
+
+        <!-- Billing Section -->
+        <section id="billing" class="section hidden">
+            <h2 class="text-2xl font-bold mb-4">Billing</h2>
+            <div class="accent-bg p-4 rounded-lg shadow">
+                <select id="billTable" class="w-full mb-2 p-2 border rounded light-bg primary-text">
+                    <!-- Tables will be populated dynamically -->
+                </select>
+                <div id="billDetails" class="mb-4">
+                    <!-- Bill details will be shown here -->
+                </div>
+                <button onclick="generateBill()" class="w-full secondary-bg light-text p-2 rounded" action="https://invoice-generator.com/">Generate Bill</button>
+            </div>
+        </section>
+
+        <!-- Feedback Section -->
+        <section id="feedback" class="section hidden">
+            <h2 class="text-2xl font-bold mb-4">Customer Feedback</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="accent-bg p-4 rounded-lg shadow">
+                    <input type="text" id="customerName" placeholder="Customer Name" class="w-full mb-2 p-2 border rounded light-bg primary-text">
+                    <textarea id="feedbackText" placeholder="Feedback" class="w-full mb-2 p-2 border rounded light-bg primary-text h-32"></textarea>
+                    <div class="mb-2">
+                        Rating: 
+                        <div class="flex gap-2" id="ratingStars">
+                            <i class="bi bi-star cursor-pointer" onclick="setRating(1)"></i>
+                            <i class="bi bi-star cursor-pointer" onclick="setRating(2)"></i>
+                            <i class="bi bi-star cursor-pointer" onclick="setRating(3)"></i>
+                            <i class="bi bi-star cursor-pointer" onclick="setRating(4)"></i>
+                            <i class="bi bi-star cursor-pointer" onclick="setRating(5)"></i>
+                        </div>
+                    </div>
+                    <button onclick="submitFeedback()" class="w-full secondary-bg light-text p-2 rounded">Submit Feedback</button>
+                </div>
+                <div id="feedbackList" class="accent-bg p-4 rounded-lg shadow">
+                    <!-- Feedback entries will be displayed here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Revenue Section -->
+        <section id="revenue" class="section hidden">
+            <h2 class="text-2xl font-bold mb-4">Revenue Analytics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="accent-bg p-4 rounded-lg shadow">
+                    <h3 class="text-lg mb-2">Today's Revenue</h3>
+                    <p class="text-2xl font-bold text-green-500" id="todayRevenue">₹0</p>
+                </div>
+                <div class="accent-bg p-4 rounded-lg shadow">
+                    <h3 class="text-lg mb-2">Weekly Revenue</h3>
+                    <p class="text-2xl font-bold text-blue-500" id="weeklyRevenue">₹0</p>
+                </div>
+                <div class="accent-bg p-4 rounded-lg shadow">
+                    <h3 class="text-lg mb-2">Monthly Revenue</h3>
+                    <p class="text-2xl font-bold text-purple-500" id="monthlyRevenue">₹0</p>
+                </div>
+                <div class="accent-bg p-4 rounded-lg shadow">
+                    <h3 class="text-lg mb-2">Total Orders</h3>
+                    <p class="text-2xl font-bold text-gray-700" id="totalOrders">0</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Initialize data structures
+        let menuItems = [];
+        let orders = [];
+        let tables = Array(12).fill().map((_, i) => ({
+            id: i + 1,
+            occupied: false,
+            order: null
+        }));
+        let feedback = [];
+        let currentRating = 0;
+        let revenue = {
+            today: 0,
+            weekly: 0,
+            monthly: 0,
+            totalOrders: 0
+        };
+
+        // Show/Hide sections
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            if(sectionId === 'tables') renderTables();
+        }
+
+        // Menu Management
+        function addMenuItem() {
+            const name = document.getElementById('itemName').value;
+            const price = document.getElementById('itemPrice').value;
+            const category = document.getElementById('itemCategory').value;
+            const imageFile = document.getElementById('itemImage').files[0];
+            
+            if(name && price && imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    menuItems.push({ name, price: parseFloat(price), category, image: e.target.result });
+                    renderMenuItems();
+                    document.getElementById('itemName').value = '';
+                    document.getElementById('itemPrice').value = '';
+                    document.getElementById('itemImage').value = '';
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                alert("Please fill all fields and upload an image.");
+            }
+        }
+
+        function renderMenuItems() {
+            const container = document.getElementById('menuItems');
+            container.innerHTML = menuItems.map((item, index) => `
+                <div class="accent-bg p-4 rounded-lg shadow mb-2">
+                    <img src="${item.image}" alt="${item.name}" class="w-full h-32 object-cover rounded-lg mb-2">
+                    <p class="font-bold">${item.name}</p>
+                    <p>₹${item.price} | ${item.category}</p>
+                    <button onclick="deleteMenuItem(${index})" class="text-red-500">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteMenuItem(index) {
+            menuItems.splice(index, 1);
+            renderMenuItems();
+        }
+
+        // Table Management
+        function renderTables() {
+            const grid = document.getElementById('tableGrid');
+            grid.innerHTML = tables.map(table => `
+                <div class="p-4 rounded-lg shadow ${table.occupied ? 'table-occupied' : 'table-available'}">
+                    <h3 class="text-lg font-bold">Table ${table.id}</h3>
+                    <p>${table.occupied ? 'Occupied' : 'Available'}</p>
+                    ${table.order ? `<p>Order: ${table.order.items.length} items</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Order Management
+        function placeOrder() {
+            const tableNum = document.getElementById('tableNumber').value;
+            const selectedItems = Array.from(document.getElementById('orderItems').selectedOptions)
+                .map(option => menuItems[option.value]);
+            
+            if(tableNum && selectedItems.length > 0) {
+                const order = {
+                    id: orders.length + 1,
+                    table: tableNum,
+                    items: selectedItems,
+                    status: 'active',
+                    timestamp: new Date()
+                };
+                
+                orders.push(order);
+                tables[tableNum - 1].occupied = true;
+                tables[tableNum - 1].order = order;
+                
+                renderTables();
+                renderActiveOrders();
+            }
+        }
+
+        function renderActiveOrders() {
+            const container = document.getElementById('activeOrders');
+            container.innerHTML = orders
+                .filter(order => order.status === 'active')
+                .map(order => `
+                    <div class="mb-4 p-4 border rounded">
+                        <h4>Order #${order.id} - Table ${order.table}</h4>
+                        <ul>
+                            ${order.items.map(item => `<li>${item.name} - ₹${item.price}</li>`).join('')}
+                        </ul>
+                        <p>Total: ₹${order.items.reduce((sum, item) => sum + item.price, 0)}</p>
+                    </div>
+                `).join('');
+        }
+
+        // Billing
+        function generateBill() {
+            const tableNum = document.getElementById('billTable').value;
+            const table = tables[tableNum - 1];
+            
+            if(table.order) {
+                const subtotal = table.order.items.reduce((sum, item) => sum + item.price, 0);
+                const gst = subtotal * 0.18;
+                const total = subtotal + gst;
+                
+                // Redirect to invoice generator
+                const invoiceData = {
+                    from: "ChefMate Restaurant",
+                    to: `Table ${tableNum}`,
+                    items: table.order.items.map(item => ({
+                        name: item.name,
+                        quantity: 1,
+                        unit_cost: item.price
+                    })),
+                    fields: {
+                        tax: "%"
+                    },
+                    tax: 18
+                };
+                const url = `https://invoice-generator.com/?data=${encodeURIComponent(JSON.stringify(invoiceData))}`;
+                window.open(url, '_blank');
+                
+                // Update revenue
+                revenue.today += total;
+                revenue.weekly += total;
+                revenue.monthly += total;
+                revenue.totalOrders++;
+                
+                // Clear table
+                table.occupied = false;
+                table.order = null;
+                
+                updateRevenue();
+                renderTables();
+            }
+        }
+
+        // Feedback
+        function setRating(rating) {
+            currentRating = rating;
+            const stars = document.getElementById('ratingStars').children;
+            for(let i = 0; i < stars.length; i++) {
+                stars[i].classList.remove('bi-star-fill');
+                stars[i].classList.add('bi-star');
+                if(i < rating) {
+                    stars[i].classList.remove('bi-star');
+                    stars[i].classList.add('bi-star-fill');
+                }
+            }
+        }
+
+        function submitFeedback() {
+            const name = document.getElementById('customerName').value;
+            const text = document.getElementById('feedbackText').value;
+            
+            if(name && text && currentRating) {
+                feedback.push({ name, text, rating: currentRating, date: new Date() });
+                renderFeedback();
+                
+                // Clear form
+                document.getElementById('customerName').value = '';
+                document.getElementById('feedbackText').value = '';
+                setRating(0);
+            }
+        }
+
+        function renderFeedback() {
+            const container = document.getElementById('feedbackList');
+            container.innerHTML = feedback.map(f => `
+                <div class="mb-4 p-4 border rounded">
+                    <h4 class="font-bold">${f.name}</h4>
+                    <div class="text-yellow-400">
+                        ${Array(5).fill().map((_, i) => 
+                            i < f.rating ? '<i class="bi bi-star-fill"></i>' : '<i class="bi bi-star"></i>'
+                        ).join('')}
+                    </div>
+                    <p>${f.text}</p>
+                    <small class="text-gray-500">${f.date.toLocaleDateString()}</small>
+                </div>
+            `).join('');
+        }
+
+        // Revenue
+        function updateRevenue() {
+            document.getElementById('todayRevenue').textContent = `₹${revenue.today}`;
+            document.getElementById('weeklyRevenue').textContent = `₹${revenue.weekly}`;
+            document.getElementById('monthlyRevenue').textContent = `₹${revenue.monthly}`;
+            document.getElementById('totalOrders').textContent = revenue.totalOrders;
+        }
+
+        // Initialize
+        showSection('menu');
+        renderMenuItems();
+        renderTables();
+        updateRevenue();
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
